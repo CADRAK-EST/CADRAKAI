@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 import os
-from app.dxf_parser import parse_dxf
+import requests
 
 main = Blueprint('main', __name__)
 
@@ -39,5 +39,5 @@ def parse_file():
     if not os.path.exists(file_path):
         return jsonify({"error": "File does not exist"}), 404
 
-    parsed_data = parse_dxf(file_path)
-    return jsonify({"message": f"File {file_path} parsed successfully", "parsed_data": parsed_data}), 200
+    response = requests.post('http://localhost:5001/parse', json={'file_path': file_path})
+    return jsonify(response.json()), response.status_code
