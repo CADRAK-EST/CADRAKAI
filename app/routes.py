@@ -2,10 +2,7 @@ from flask import Blueprint, request, jsonify
 import os
 import requests
 import logging
-from app.logging_config import setup_logging
 
-# Setup logging
-setup_logging()
 logger = logging.getLogger(__name__)
 
 main = Blueprint('main', __name__)
