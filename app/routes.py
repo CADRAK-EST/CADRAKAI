@@ -27,9 +27,9 @@ def upload_file():
         logger.error("No selected file")
         return jsonify({"error": "No selected file"}), 400
 
-    if not file.filename.endswith('.dxf'):  # Check if the file is a .dxf file
-        logger.error("Invalid file type. Only .dxf files are allowed")
-        return jsonify({"error": "Invalid file type. Only .dxf files are allowed"}), 400
+    if not (file.filename.endswith('.dxf') or file.filename.endswith('.zip')): 
+        logger.error("Invalid file type. Only .dxf or .zip files are allowed")
+        return jsonify({"error": "Invalid file type. Only .dxf or .zip files are allowed"}), 400
 
     file_path = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(file_path)
