@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response
 import os
 import requests
 import logging
@@ -49,14 +49,18 @@ def parse_file():
         return jsonify({"error": "File does not exist"}), 404
 
     try:
-        with open(file_path, 'rb') as f:
-            response = requests.post('http://localhost:5001/parse', files={'file': f})
-        response_data = response.json()
-        if response.status_code == 200:
-            logger.info(f"File {file_path} parsed successfully")
-        else:
-            logger.error(f"Failed to parse file {file_path}: {response_data}")
-        return jsonify(response_data), response.status_code
+        def generate():
+            count = 0
+            with open(file_path, 'rb') as f:
+                with requests.post('http://localhost:5001/parse', files={'file': f}, stream=True) as response:
+                    response.raise_for_status()
+                    for chunk in response.iter_content(chunk_size=None):
+                        if chunk:
+                            count += 1
+                            logger.info(f"Received parsed data chunk number: {count}")
+                            yield chunk + b'\n'
+        return Response(generate(), mimetype='application/json')
     except requests.exceptions.RequestException as e:
         logger.error(f"Failed to communicate with CADRAK Engine: {str(e)}")
         return jsonify({"error": "Failed to communicate with CADRAK Engine"}), 500
+
